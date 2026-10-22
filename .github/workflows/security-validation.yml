@@ -1,0 +1,22 @@
+name: Security dependency validation
+on:
+  pull_request:
+  push:
+    branches:
+      - security/**
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Install locked dependencies
+        run: npm exec --yes --package yarn@1.22.22 -- yarn install --frozen-lockfile --ignore-scripts
+      - name: Typecheck and build
+        run: npm run build
+      - name: Audit dependencies
+        run: npm exec --yes --package yarn@1.22.22 -- yarn audit
